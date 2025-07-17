@@ -9,6 +9,8 @@ local points = {}
 local cropping = false
 -- Original value of osc property
 local osc_prop = false
+-- obvious
+local ffmpeg_crop = true
 
 -- Helper that converts two points to top-left and bottom-right
 local swizzle_points = function (p1, p2)
@@ -198,6 +200,11 @@ local mouse_btn0_cb = function ()
 
     if #points == 2 then
         crop(points[1], points[2])
+        if ffmpeg_crop then
+            crop_str = string.format("\"crop=%d:%d:%d:%d\"", math.abs(points[2].x - points[1].x), math.abs(points[2].y - points[1].y), points[1].x, points[1].y)
+            cmd_str = string.format("ffmpeg -i \"%s\" -vf %s \"%s_cropped.mp4\"", mp.get_property("filename"), crop_str, mp.get_property("filename/no-ext"))
+            os.execute(cmd_str)
+        end
         easycrop_stop()
     end
 end
@@ -250,4 +257,4 @@ mp.add_key_binding("mouse_move", draw_cropper)
 mp.observe_property("osd-width", "native", draw_cropper)
 mp.observe_property("osd-height", "native", draw_cropper)
 
-mp.add_key_binding("c", "easy_crop", easycrop_activate)
+mp.add_key_binding("y", "easy_crop", easycrop_activate)
